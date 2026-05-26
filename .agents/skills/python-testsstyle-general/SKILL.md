@@ -9,7 +9,7 @@ description: Use whenever Codex writes, edits, refactors, reviews, debugs, or ru
 
 Write Python tests that prove user-visible behavior, fail for the right reason, and stay cheap to rerun.
 
-Keep this skill focused on test code and test execution. Use `python-codingstyle-general` for non-test implementation structure and style.
+Keep this skill focused on test code and test execution. Use `python-codingstyle-general` for non-test implementation style and `python-architecture-general` for project layout or configuration-surface decisions.
 
 ## Use This Skill For
 

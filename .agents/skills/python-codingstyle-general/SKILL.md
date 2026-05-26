@@ -9,7 +9,7 @@ description: Use whenever Codex writes, edits, refactors, reviews, or restructur
 
 Write Python that stays easy for Codex and humans to reason about: small files, small functions, explicit boundaries, clear types, and predictable behavior.
 
-Keep this skill focused on implementation code. Mention tests only where production code structure must support separate test files, and use `python-testsstyle-general` when the main task is writing or running Python tests.
+Keep this skill focused on implementation code. Mention tests only where production code structure must support separate test files, use `python-testsstyle-general` when the main task is writing or running Python tests, and use `python-architecture-general` for project layout, package boundaries, and configuration-surface decisions.
 
 ## Use This Skill For
 
