@@ -1,0 +1,4 @@
+interface:
+  display_name: "Python Coding Style"
+  short_description: "Default Python coding rules for Codex"
+  default_prompt: "Use $python-codingstyle-general whenever writing or refactoring any Python code so it stays small, typed, and maintainable."
