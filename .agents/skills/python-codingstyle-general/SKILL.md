@@ -1,6 +1,6 @@
 ---
 name: python-codingstyle-general
-description: Use when writing, editing, refactoring, reviewing, or restructuring Python implementation code: modules, libraries, scripts, CLIs, migrations, utilities, and mixed-purpose files. Trigger on "write Python code", "add a Python command", "fix this Python file", "split this module", or "clean up this script". Do not use when the main task is Python tests; route tests to python-testsstyle-general.
+description: Use when writing, editing, refactoring, reviewing, or restructuring Python implementation code - modules, libraries, scripts, CLIs, migrations, utilities, and mixed-purpose files. Trigger on "write Python code", "add a Python command", "fix this Python file", "split this module", or "clean up this script". Do not use when the main task is Python tests; route tests to python-testsstyle-general.
 ---
 
 # Python Coding

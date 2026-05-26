@@ -1,6 +1,6 @@
 ---
 name: python-testsstyle-general
-description: Use when writing, editing, refactoring, reviewing, debugging, or running Python tests: pytest, unittest, targeted failures, fixtures, mocks, flaky tests, coverage, and TDD. Trigger on "write Python tests", "run pytest", "fix this failing test", "add a regression test", or "increase Python coverage". Do not use for implementation-only Python work; route that to python-codingstyle-general.
+description: Use when writing, editing, refactoring, reviewing, debugging, or running Python tests - pytest, unittest, targeted failures, fixtures, mocks, flaky tests, coverage, and TDD. Trigger on "write Python tests", "run pytest", "fix this failing test", "add a regression test", or "increase Python coverage". Do not use for implementation-only Python work; route that to python-codingstyle-general.
 ---
 
 # Python Tests Style
