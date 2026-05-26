@@ -8,7 +8,7 @@ Apply this only when the repository does not already establish a different struc
 
 ```text
 code/
-  back/
+  back/   # for backend part
     app/
       __init__.py
       api/
@@ -16,7 +16,7 @@ code/
       services/
       storage/
       settings.py
-  front/
+  front/    # for frontend (html css js etc) part
   tests/
     unit/
     integration/
@@ -24,16 +24,15 @@ code/
   scripts/
     sync_data.py
 configs.yaml
-.env
 ```
 
 Intent:
 
 - `code/back/` holds Python application packages
-- `code/tests/` holds test code and test support
+- `code/front/` holds frontend assets when the project includes a frontend surface
+- `code/tests/` holds test code and test support, including `testlogs/` when the repo stores test artifacts
 - `code/scripts/` holds operational scripts
 - `configs.yaml` holds non-secret project configuration
-- `.env` holds sensitive values only
 
 ## Split heuristics
 
@@ -119,7 +118,6 @@ worker_count: 4
 Rules:
 
 - every entry gets a clear descriptive comment
-- `.env` stays gitignored
 - non-secret tunables do not belong in `.env`
 
 ## Loading pattern
@@ -153,6 +151,8 @@ Keep file reading and env access at the boundary. Pass `Settings` inward rather 
 Document architecture through:
 
 - clear package and module names
+- function-level docstrings across implementation modules
+- comments on important logic blocks, invariants, and non-obvious branches
 - concise exported interfaces
 - comments for each `.env` and `configs.yaml` entry
 - short local notes only where the structure would otherwise be surprising

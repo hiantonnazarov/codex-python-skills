@@ -1,6 +1,6 @@
 ---
 name: python-architecture-general
-description: Use when designing, reviewing, or refactoring Python project structure, package layout, module boundaries, public APIs, split decisions, configuration surfaces, settings loading, or secret handling. Trigger on requests such as "organize this Python project", "split this package", "design module boundaries", "clean up settings", or "move constants out of code". Prefer the repository's existing structure first; use the default code-folder and configs.yaml layout only when the repo does not already define a different convention.
+description: Use when designing, reviewing, or refactoring Python project structure, package layout, module boundaries, public APIs, split decisions, configuration surfaces, settings loading, constants, or secret handling. Trigger on "organize this Python project", "split this package", "design module boundaries", "clean up settings", or "move constants out of code". Prefer the repository's existing structure first; use the default `code/` plus `configs.yaml` layout only when the repo does not already define a different convention.
 ---
 
 # Python Architecture
@@ -11,37 +11,39 @@ Design Python projects so structure communicates responsibility: clear package b
 
 Keep this skill focused on architecture and configuration decisions. Use `python-codingstyle-general` for implementation-code style and `python-testsstyle-general` for Python test authoring and execution.
 
-## Use This Skill For
-
-- Planning or refactoring Python project layout
-- Defining package boundaries and module responsibilities
-- Deciding when to split files, packages, or subsystems
-- Designing public API surfaces for packages and modules
-- Organizing configuration, settings, constants, env usage, and secrets handling
-
-## Do Not Use This Skill For
-
-- Low-level implementation-style decisions inside already well-scoped modules
-- Python test-writing and test-running tasks
-- Framework-specific architecture rules when a more precise skill or repo convention exists
+Source order for Python architecture decisions: local package/build config first; then existing import/runtime patterns; then Python language reference import semantics; then PEP 8 and Google Python Style Guide naming and public-interface guidance.
 
 ## Decision Order
 
 1. Inspect the repository and follow established layout and naming patterns first.
 2. If the repo already defines structure, extend it rather than replacing it.
 3. If the repo does not define a clear structure, apply the default preferred layout in this skill.
-4. Keep architecture decisions driven by responsibility boundaries, not aesthetics or novelty.
+4. Check import paths, entrypoints, and configuration loading before moving files.
+5. Keep architecture decisions driven by responsibility boundaries, not aesthetics or novelty.
 
 ## Default Preferred Layout
 
 Use this layout only when the repository does not already define a different convention:
 
-- Put project code under `code/`.
-- Use `code/back/` for backend and shared Python application packages.
-- Use `code/front/` for frontend code when the project includes it.
-- Use `code/tests/` for tests and test-related support.
-- Use `code/tests/testlogs/` and nearby subfolders for test artifacts when the repo keeps them.
-- Use `code/scripts/` for project scripts and operational entrypoints.
+```text
+code/
+  back/   # for backend part
+    app/
+      __init__.py
+      api/
+      domain/
+      services/
+      storage/
+      settings.py
+  front/    # for frontend (html css js etc) part
+  tests/
+    unit/
+    integration/
+    testlogs/
+  scripts/
+    sync_data.py
+configs.yaml
+```
 
 Keep tests out of implementation packages unless the repository clearly uses co-located tests already.
 
@@ -52,7 +54,9 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 - Give each package one clear responsibility.
 - Separate orchestration, domain logic, adapters, and infrastructure concerns.
 - Avoid packages that mix API endpoints, persistence, CLI glue, and business rules without clear boundaries.
+- Prefer standard library, existing utilities, and current dependencies before adding new packages; add a dependency only when it materially reduces risk or complexity.
 - Keep cross-package imports directional and predictable.
+- Avoid import cycles and import-time side effects; entrypoints should call runtime setup explicitly.
 - Prefer shallow package trees; add depth only for genuine sub-domains or isolation needs.
 
 ### Public API design
@@ -62,6 +66,7 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 - Prefer a small public API over exposing the entire package tree.
 - For reusable packages, make the supported import surface explicit with stable re-exports or `__all__` where that fits the repo.
 - Refactor internal structure without breaking public import paths unless the task explicitly allows it.
+- Treat public imports as compatibility commitments; add adapters or re-exports when moving internals unless a breaking migration is requested.
 
 ### Split decisions
 
@@ -73,10 +78,11 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 ### Configuration and secrets
 
 - Keep `.env` for sensitive values only because it should remain gitignored.
-- Keep major constants and non-secret configuration in `configs.yaml` when the repository does not already define a different config surface.
-- Add a clear descriptive comment for every value in `.env` and `configs.yaml`.
+- Keep non-secret configuration in `configs.yaml` when the repository does not already define a different versioned config surface.
+- Add a clear descriptive comment for each non-obvious setting when the config format supports comments.
 - Load environment and config values at explicit boundaries, not ad hoc across the codebase.
 - Keep secrets, user-specific values, and deploy-specific credentials out of versioned non-secret config files.
+- Keep configuration names stable and descriptive; avoid scattering duplicate constants across modules.
 
 ### Settings flow
 
@@ -84,12 +90,14 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 - Validate required settings early and fail with clear startup errors.
 - Pass typed settings inward instead of repeatedly reading env vars or config files.
 - Keep default values explicit and documented.
+- Separate deploy-time settings from domain constants. If a value changes by environment, it belongs in config; if it defines business behavior, keep it near the domain model or documented config surface.
 
 ## Documentation Expectations
 
 - Document the intended package layout when it is non-obvious.
 - Keep architecture notes short and close to the boundary they explain.
-- Use comments in `configs.yaml` and `.env` to explain each setting's purpose, not just restate its key.
+- Use config comments or nearby documentation to explain each setting's purpose, not just restate its key.
+- Ensure implementation guidance keeps function-level docstrings and comments on important logic blocks so architectural intent remains understandable in code.
 - Prefer self-explanatory package names and module names over long architecture prose.
 
 ## Common Mistakes
@@ -99,24 +107,23 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 | Inventing a new layout in a repo that already has one | Follow the repo first and improve only where necessary |
 | Letting public and internal modules blur together | Define stable entrypoints and keep helpers private |
 | Reading env values from many modules | Centralize config loading and pass structured settings |
-| Putting non-secret knobs into `.env` | Move them to `configs.yaml` with comments |
+| Putting non-secret knobs into `.env` | Move them to `configs.yaml` or the repo's existing versioned config surface |
 | Splitting files mechanically by length only | Split by responsibility and dependency boundaries |
 
-## Examples
+## Application Examples
 
-### Good triggers
+- Constants cleanup: move deploy-tuned values to `configs.yaml` or the repo's existing versioned config surface, keep true domain constants near domain code, and pass a typed settings object inward.
+- Package split: preserve old public imports with a thin compatibility module or re-export unless the task explicitly requests a breaking change.
+- Script growth: keep script entrypoints thin and move reusable orchestration or domain logic into importable packages.
 
-- "Design the package structure for this Python service."
-- "Move these constants and settings out of code."
-- "Split this large Python package into clearer modules."
-- "Define the public API for this internal library."
+## Routing Examples
 
-### Bad triggers
+Use for: "Design the package structure for this Python service", "Move these constants and settings out of code", "Define the public API for this internal library".
 
-- "Write the parser implementation for this module."
-- "Add pytest coverage for the bug fix."
-- "Run this failing Python test."
+Do not use for: "Write the parser implementation for this module", "Add pytest coverage for the bug fix", "Run this failing Python test".
 
 ## Reference
 
 Read [references/architecture-reference.md](references/architecture-reference.md) for concrete layout examples, split heuristics, public API patterns, and `configs.yaml` or `.env` guidance.
+
+Use [assets/architecture-decision-template.md](assets/architecture-decision-template.md) only when the user asks for a written architecture note, migration note, or handoff summary.

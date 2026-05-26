@@ -1,6 +1,6 @@
 ---
 name: python-testsstyle-general
-description: Use whenever Codex writes, edits, refactors, reviews, debugs, or runs any Python tests, including pytest and unittest suites, single test files, targeted test cases, fixture changes, flaky-test fixes, and TDD work. Trigger on requests such as "write Python tests", "run pytest", "fix this failing test", "add a regression test", or "increase Python coverage". Do not use when the main task is writing non-test Python implementation code; route those tasks to python-codingstyle-general.
+description: Use when writing, editing, refactoring, reviewing, debugging, or running Python tests: pytest, unittest, targeted failures, fixtures, mocks, flaky tests, coverage, and TDD. Trigger on "write Python tests", "run pytest", "fix this failing test", "add a regression test", or "increase Python coverage". Do not use for implementation-only Python work; route that to python-codingstyle-general.
 ---
 
 # Python Tests Style
@@ -11,19 +11,7 @@ Write Python tests that prove user-visible behavior, fail for the right reason, 
 
 Keep this skill focused on test code and test execution. Use `python-codingstyle-general` for non-test implementation style and `python-architecture-general` for project layout or configuration-surface decisions.
 
-## Use This Skill For
-
-- Writing or editing Python tests in `pytest`, `unittest`, or repository-specific wrappers
-- Running targeted Python tests and expanding to broader checks when needed
-- Practicing red-green-refactor and adding regression coverage for bugs
-- Fixing flaky, brittle, or over-coupled Python tests
-- Reviewing Python test quality, isolation, and failure clarity
-
-## Do Not Use This Skill For
-
-- Pure implementation-code tasks with no meaningful test work
-- General Python module structure or script style outside test code
-- Non-Python test frameworks unless the repository intentionally mixes them
+Source order for Python test decisions: configured test tooling first; then local test patterns; then pytest or unittest semantics; then PEP 8 and Google Python Style Guide readability rules. Prefer the Python standard library and existing helpers before adding new test dependencies.
 
 ## Workflow
 
@@ -31,7 +19,7 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 2. Start at the lowest useful test layer that proves the behavior.
 3. For behavior changes or bug fixes, write or update the test first when practical.
 4. Run the smallest relevant test selection first and confirm the failure matches the intended behavior gap.
-5. Change code or the test only after understanding why it failed.
+5. Change code or the test only after understanding why it failed; do not edit assertions blindly to get green.
 6. Rerun the same targeted test until it passes cleanly.
 7. Expand to the next relevant scope only after the focused check is green.
 
@@ -62,6 +50,7 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 - Keep tests in dedicated test files, never inside production modules.
 - Follow repository naming conventions first; otherwise prefer `tests/`, `test_*.py`, and `test_*` function names.
 - Keep one test focused on one behavior. If the name needs "and", split it.
+- Keep test files import-safe and deterministic; top-level setup should not perform I/O, network calls, or irreversible state changes.
 
 ### What to test
 
@@ -76,6 +65,7 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 - Assert the behavior that matters most first.
 - Avoid vague assertions such as "result is not None" when the real expected value is known.
 - Do not over-assert unrelated details that make tests brittle.
+- For exceptions, assert the specific exception type and meaningful message or context when that is part of the contract.
 
 ### Fixtures and setup
 
@@ -83,6 +73,7 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 - Prefer factory helpers over large fixture pyramids.
 - Avoid autouse fixtures unless the repository already relies on them and the behavior is obvious.
 - Keep each test independent and safe to run alone.
+- Put cleanup in fixtures, context managers, or `tearDown`-style hooks so failed tests still release files, env changes, patches, and services.
 
 ### Mocks and isolation
 
@@ -91,6 +82,7 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 - Do not mock the function you are trying to test.
 - Patch where the dependency is looked up, not where it originally comes from.
 - If a mock expectation duplicates implementation steps, the test is probably too coupled.
+- Keep fake data small but realistic enough to exercise the contract, not just the happy-path shape.
 
 ### Running tests
 
@@ -106,14 +98,6 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 - Avoid sleeps unless there is no better synchronization mechanism in the repo.
 - Do not paper over flakiness with retries unless the repository explicitly treats retries as the correct mechanism.
 
-## Execution Pattern
-
-1. Identify the narrowest command that exercises the target behavior.
-2. Run it and inspect the failure.
-3. Make the smallest test or code change required.
-4. Rerun the same command.
-5. Expand to nearby tests or the full relevant suite.
-
 ## Common Mistakes
 
 | Mistake | Fix |
@@ -125,21 +109,20 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 | Making tests pass by deleting assertions | Strengthen the behavior check instead of weakening it |
 | Running the full suite on every iteration | Start narrow, then widen only when useful |
 
-## Examples
+## Application Examples
 
-### Good triggers
+- Bug fix: add one regression test that fails on the old behavior, name it after the user-visible bug, then make the smallest implementation change.
+- Flaky test: identify the shared state, timing assumption, or uncontrolled boundary; replace sleep-based timing with existing polling or deterministic synchronization.
+- Fixture refactor: extract only duplicated setup that appears in multiple tests; keep test-specific values visible at the call site.
 
-- "Write pytest coverage for this Python bug fix."
-- "Run this failing Python test file and fix the regression."
-- "Add a regression test before changing the parser."
-- "Refactor these fixtures so the tests are easier to understand."
+## Routing Examples
 
-### Bad triggers
+Use for: "Write pytest coverage for this Python bug fix", "Run this failing Python test file and fix the regression", "Add a regression test before changing the parser".
 
-- "Write a new Python CLI for this workflow."
-- "Split this application module into smaller files."
-- "Improve typing in this Python library."
+Do not use for: "Write a new Python CLI for this workflow", "Split this application module into smaller files", "Improve typing in this Python library".
 
 ## Reference
 
 Read [references/testing-reference.md](references/testing-reference.md) for concrete pytest patterns, test command examples, fixture guidance, and red-green examples.
+
+Use [assets/test-change-template.md](assets/test-change-template.md) only when the user asks for a test plan, coverage note, or test handoff.
