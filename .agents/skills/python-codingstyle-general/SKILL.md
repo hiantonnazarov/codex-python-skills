@@ -27,11 +27,13 @@ Keep this skill focused on implementation code. Mention tests only where product
 ## Workflow
 
 1. Inspect the local repository patterns before introducing new structure.
-2. Choose the smallest correct change that solves the task fully.
-3. Keep implementation code and tests in separate files. If tests are needed, add or update dedicated test files rather than mixing test code into production modules.
-4. Split large or mixed-responsibility files instead of extending them further.
-5. Validate inputs and outputs at external boundaries: CLI args, env vars, files, network payloads, and public APIs.
-6. Prefer the smallest relevant verification step before expanding scope.
+2. Check the smallest relevant repo guidance and tooling first: `AGENTS.md`, `README.md`, `pyproject.toml`, linter or type-checker config, and the closest similar module.
+3. Choose the smallest correct change that solves the task fully.
+4. Preserve existing public interfaces unless the task explicitly allows a breaking change.
+5. Keep implementation code and tests in separate files. If tests are needed, add or update dedicated test files rather than mixing test code into production modules.
+6. Split large or mixed-responsibility files instead of extending them further.
+7. Validate inputs and outputs at external boundaries: CLI args, env vars, files, network payloads, and public APIs.
+8. Prefer the smallest relevant verification step before expanding scope.
 
 ## Core Rules
 
@@ -47,6 +49,7 @@ Keep this skill focused on implementation code. Mention tests only where product
 - Keep functions focused on one job with clear inputs and outputs.
 - Separate orchestration from business logic.
 - Avoid hidden global state, implicit mutation, and long parameter lists.
+- Prefer early returns and simple control flow over deep nesting.
 - Use descriptive names; do not rely on comments to explain vague code.
 - Introduce abstractions only when they remove real duplication or clarify a boundary.
 
@@ -56,6 +59,7 @@ Keep this skill focused on implementation code. Mention tests only where product
 - Prefer precise standard types and small dataclasses or typed objects over loose dictionaries when the structure matters.
 - Validate external data at boundaries instead of letting untrusted shapes leak inward.
 - Make return values explicit; avoid functions that sometimes return data and sometimes print or exit.
+- Avoid `Any` unless an external boundary forces it; narrow it quickly.
 
 ### Errors and failures
 
@@ -63,6 +67,7 @@ Keep this skill focused on implementation code. Mention tests only where product
 - Use error messages that explain what failed and what input or operation caused it.
 - Fail safely for scripts and CLIs: no partial destructive behavior without explicit intent.
 - Do not swallow exceptions silently.
+- Preserve exception context when translating failures.
 
 ### Configuration and secrets
 
@@ -82,6 +87,13 @@ Keep this skill focused on implementation code. Mention tests only where product
 - Parse arguments explicitly and return process exit codes in a predictable way.
 - Print deterministic, concise output suitable for terminal use and automation.
 - Keep file operations, network calls, and destructive actions explicit.
+- Keep `print()` in CLIs and user-facing scripts; prefer logging or returned values in library-style code.
+
+### I/O and resources
+
+- Prefer `pathlib.Path` and explicit text encodings for file paths and file I/O.
+- Use context managers for files, connections, locks, and temporary resources.
+- Keep I/O at the edges when practical so core logic stays easy to test and reuse.
 
 ## Review Checklist
 

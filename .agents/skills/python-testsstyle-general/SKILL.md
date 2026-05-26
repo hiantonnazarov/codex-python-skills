@@ -27,12 +27,13 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 
 ## Workflow
 
-1. Start at the lowest useful test layer that proves the behavior.
-2. For behavior changes or bug fixes, write or update the test first when practical.
-3. Run the smallest relevant test selection first and confirm the failure matches the intended behavior gap.
-4. Change code or the test only after understanding why it failed.
-5. Rerun the same targeted test until it passes cleanly.
-6. Expand to the next relevant scope only after the focused check is green.
+1. Inspect the smallest useful test context first: repo test commands, `pyproject.toml` or `pytest.ini`, markers, fixture layout, and the nearest similar test.
+2. Start at the lowest useful test layer that proves the behavior.
+3. For behavior changes or bug fixes, write or update the test first when practical.
+4. Run the smallest relevant test selection first and confirm the failure matches the intended behavior gap.
+5. Change code or the test only after understanding why it failed.
+6. Rerun the same targeted test until it passes cleanly.
+7. Expand to the next relevant scope only after the focused check is green.
 
 ## Red-Green-Refactor
 
@@ -88,6 +89,7 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 - Mock only true boundaries: network, time, filesystem, subprocesses, randomness, and expensive services.
 - Prefer fakes or temporary directories over deep mocking when practical.
 - Do not mock the function you are trying to test.
+- Patch where the dependency is looked up, not where it originally comes from.
 - If a mock expectation duplicates implementation steps, the test is probably too coupled.
 
 ### Running tests
@@ -101,6 +103,7 @@ Keep this skill focused on test code and test execution. Use `python-codingstyle
 
 - Remove timing assumptions, hidden shared state, and order dependence.
 - Use deterministic data and explicit waits or polling helpers where the repository already supports them.
+- Avoid sleeps unless there is no better synchronization mechanism in the repo.
 - Do not paper over flakiness with retries unless the repository explicitly treats retries as the correct mechanism.
 
 ## Execution Pattern

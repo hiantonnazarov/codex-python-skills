@@ -53,12 +53,14 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 - Separate orchestration, domain logic, adapters, and infrastructure concerns.
 - Avoid packages that mix API endpoints, persistence, CLI glue, and business rules without clear boundaries.
 - Keep cross-package imports directional and predictable.
+- Prefer shallow package trees; add depth only for genuine sub-domains or isolation needs.
 
 ### Public API design
 
 - Make public entrypoints obvious through stable module paths and limited exported names.
 - Keep internal helpers private by default.
 - Prefer a small public API over exposing the entire package tree.
+- For reusable packages, make the supported import surface explicit with stable re-exports or `__all__` where that fits the repo.
 - Refactor internal structure without breaking public import paths unless the task explicitly allows it.
 
 ### Split decisions
@@ -79,6 +81,7 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 ### Settings flow
 
 - Convert raw env and YAML values into a structured settings object near startup or another clear boundary.
+- Validate required settings early and fail with clear startup errors.
 - Pass typed settings inward instead of repeatedly reading env vars or config files.
 - Keep default values explicit and documented.
 
