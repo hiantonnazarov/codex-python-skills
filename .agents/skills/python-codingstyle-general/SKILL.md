@@ -31,7 +31,13 @@ Source order for Python decisions: configured formatters, linters, and type chec
 
 - Target Python source files under 400 lines when practical.
 - Reconsider structure before a file passes roughly 500 lines.
-- Split by responsibility, not arbitrarily: parsing, I/O, orchestration, domain logic, and formatting often belong in separate modules.
+- If you cannot describe the file's job in one sentence, it likely needs a clearer boundary.
+- Treat line count as a secondary smell, not the reason to split. Logic comes first: split once the file stops having one crisp purpose, even if it is still well under 400 lines.
+- Split by responsibility and change axis, not arbitrarily: parsing, I/O, orchestration, domain logic, formatting, and transport glue often belong in separate modules.
+- Separate code that works on different data models or different boundary contracts. If one file owns multiple input or output shapes, it usually needs clearer module boundaries.
+- Split when sections need different dependencies, different test styles, or different failure handling. That usually signals multiple concerns even before the file is large.
+- Do not use catch-all files such as `utils.py`, `helpers.py`, or `misc.py` as the default home for extracted code. Name modules after the behavior or boundary they own.
+- Keep cohesive flows together. Do not split a short, single-model pipeline across files just to reduce line count or create tiny one-purpose files with no real boundary value.
 - Keep scripts thin. Put reusable logic in importable functions or modules.
 - Keep modules import-safe: no parsing CLI args, network calls, file writes, or process exits at import time.
 
@@ -50,6 +56,7 @@ Source order for Python decisions: configured formatters, linters, and type chec
 - Add type hints to public functions, methods, and module-level constants where useful.
 - Prefer precise standard types and small dataclasses or typed objects over loose dictionaries when the structure matters.
 - Validate external data at boundaries instead of letting untrusted shapes leak inward.
+- Parse and normalize raw external payloads once at the boundary. Pass typed or normalized internal shapes inward instead of re-checking ad hoc in every layer.
 - Make return values explicit; avoid functions that sometimes return data and sometimes print or exit.
 - Avoid `Any` unless an external boundary forces it; narrow it quickly.
 
@@ -59,6 +66,7 @@ Source order for Python decisions: configured formatters, linters, and type chec
 - Keep `try` blocks as small as possible and avoid bare `except`.
 - Use error messages that explain what failed and what input or operation caused it.
 - Fail safely for scripts and CLIs: no partial destructive behavior without explicit intent.
+- When a function mutates files, state, or external systems, make the success point explicit and leave the pre-commit part easy to reason about.
 - Do not swallow exceptions silently.
 - Preserve exception context when translating failures.
 
@@ -104,7 +112,8 @@ Source order for Python decisions: configured formatters, linters, and type chec
 ## Application Examples
 
 - Utility script: keep `main()` small, move parsing/normalization into importable functions, use `Path`, explicit encodings, and return an exit code.
-- Large module: split parser, I/O adapter, domain transformation, and formatting code only where those responsibilities already pull in different dependencies or change for different reasons.
+- Large module: split parser, I/O adapter, domain transformation, and formatting code when those responsibilities own different models, dependencies, or reasons to change.
+- Shared extraction: if logic is reused across modules, move it into a module named for that shared behavior such as `normalization.py` or `payload_validation.py`, not a generic `utils.py`.
 - Error handling: catch `KeyError` only around the lookup that can raise it, then translate it with context; do not wrap the entire function in a broad handler.
 
 ## Routing Examples

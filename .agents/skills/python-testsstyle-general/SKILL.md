@@ -56,7 +56,10 @@ Source order for Python test decisions: configured test tooling first; then loca
 
 - Test behavior, contracts, and user-visible outcomes before internal implementation details.
 - Cover normal flow, invalid input, boundary cases, and the regression that motivated the change.
+- When relevant to the code path, cover boundary-failure cases explicitly: empty input, malformed payloads, filesystem or network errors, and permission failures.
+- For stateful code paths, test both the visible failure and the post-failure state: no partial write, no leaked temp resource, no duplicate side effect, or a documented recovery path.
 - Prefer one strong regression test over many weak variations.
+- Do not duplicate the same scenario across unit and integration layers unless each layer proves a different contract.
 - Add integration or end-to-end coverage only when lower layers cannot prove the behavior.
 
 ### Assertions
@@ -97,6 +100,7 @@ Source order for Python test decisions: configured test tooling first; then loca
 - Use deterministic data and explicit waits or polling helpers where the repository already supports them.
 - Avoid sleeps unless there is no better synchronization mechanism in the repo.
 - Do not paper over flakiness with retries unless the repository explicitly treats retries as the correct mechanism.
+- Prefer assertions that prove idempotence or safe retry behavior when the production code may be called twice after partial failure.
 
 ## Common Mistakes
 

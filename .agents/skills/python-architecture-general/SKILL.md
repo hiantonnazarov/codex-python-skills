@@ -19,7 +19,8 @@ Source order for Python architecture decisions: local package/build config first
 2. If the repo already defines structure, extend it rather than replacing it.
 3. If the repo does not define a clear structure, apply the default preferred layout in this skill.
 4. Check import paths, entrypoints, and configuration loading before moving files.
-5. Keep architecture decisions driven by responsibility boundaries, not aesthetics or novelty.
+5. When moving or renaming modules, update every affected import path, entrypoint, script, config reference, and documented path in the same change.
+6. Keep architecture decisions driven by responsibility boundaries, not aesthetics or novelty.
 
 ## Default Preferred Layout
 
@@ -67,19 +68,27 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 - For reusable packages, make the supported import surface explicit with stable re-exports or `__all__` where that fits the repo.
 - Refactor internal structure without breaking public import paths unless the task explicitly allows it.
 - Treat public imports as compatibility commitments; add adapters or re-exports when moving internals unless a breaking migration is requested.
+- Treat script entrypoints, config paths, and documented module paths as compatibility surfaces too, not just Python imports.
 
 ### Split decisions
 
+- If you cannot explain a module or package purpose in one sentence, the boundary is probably wrong.
 - Split a module when it has multiple responsibilities, multiple change reasons, or unrelated dependency sets.
+- Treat the 400-line guideline as a secondary review trigger, not the architectural reason to split. If the model or boundary is wrong at 200 lines, split it there.
+- Split around owned models and boundaries: transport schemas, domain entities, persistence records, settings objects, and presentation formatting should not blur together in one module once they evolve independently.
+- Split when one area coordinates workflow and another defines reusable rules or transformations. Orchestration and policy usually deserve separate modules.
+- Split when the same package mixes boundary-specific error handling or dependency lifecycles, for example HTTP concerns, database concerns, and core business invariants.
+- Do not split by syntactic bucket names alone such as `utils`, `helpers`, or `misc`. Create modules around owned responsibilities and stable boundaries instead.
 - Split a package when one area can evolve, test, or deploy semi-independently from another.
 - Do not split just to hit an arbitrary file count; split around boundaries that reduce confusion.
+- Keep cohesive vertical slices together when they share one model, one dependency set, and one reason to change. Avoid turning one clear slice into many tiny files without distinct ownership.
 - If a file keeps growing because it is becoming a router, coordinator, formatter, and service layer at once, break it apart.
 
 ### Configuration and secrets
 
 - Keep `.env` for sensitive values only because it should remain gitignored.
 - Keep non-secret configuration in `configs.yaml` when the repository does not already define a different versioned config surface.
-- Add a clear descriptive comment for each non-obvious setting when the config format supports comments.
+- Add a clear descriptive comment for each setting when the config format supports comments.
 - Load environment and config values at explicit boundaries, not ad hoc across the codebase.
 - Keep secrets, user-specific values, and deploy-specific credentials out of versioned non-secret config files.
 - Keep configuration names stable and descriptive; avoid scattering duplicate constants across modules.
@@ -109,6 +118,7 @@ Keep tests out of implementation packages unless the repository clearly uses co-
 | Reading env values from many modules | Centralize config loading and pass structured settings |
 | Putting non-secret knobs into `.env` | Move them to `configs.yaml` or the repo's existing versioned config surface |
 | Splitting files mechanically by length only | Split by responsibility and dependency boundaries |
+| Moving code into `utils.py` because it feels shared | Create a module named for the owned behavior or boundary instead |
 
 ## Application Examples
 

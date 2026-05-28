@@ -1,4 +1,4 @@
 interface:
   display_name: "Python Test Style"
   short_description: "Default Python test rules for Codex"
-  default_prompt: "Use $python-testsstyle-general whenever writing or running any Python tests so they stay targeted, reliable, and TDD-friendly."
+  default_prompt: "Use $python-testsstyle-general whenever writing or running Python tests so they stay targeted, reliable, and TDD-friendly. Prefer the smallest failing check first, assert visible contracts, and cover relevant boundary-failure cases instead of only happy paths."

@@ -1,4 +1,4 @@
 interface:
   display_name: "Python Architecture"
   short_description: "Default Python architecture rules"
-  default_prompt: "Use $python-architecture-general when designing or refactoring Python project layout, package boundaries, public APIs, and configuration structure."
+  default_prompt: "Use $python-architecture-general when designing or refactoring Python project layout, package boundaries, public APIs, configuration structure, or module decomposition. Prefer repository structure first; split by owned responsibility, model, and boundary rather than line count or generic utils buckets."

@@ -38,7 +38,11 @@ Intent:
 
 Split a module when:
 
+- you cannot explain its purpose in one sentence
 - it has more than one primary responsibility
+- it owns multiple models or boundary contracts that change independently
+- one part orchestrates work while another part defines reusable policy or domain rules
+- transport concerns, persistence concerns, and domain invariants are entangled
 - it depends on two unrelated parts of the system
 - changes in one area force risky edits in another
 - imports suggest circular or tangled relationships
@@ -48,6 +52,27 @@ Split a package when:
 - one sub-area has a stable public API and another is internal-only
 - adapters or integrations dominate one section while domain logic dominates another
 - tests naturally cluster around different responsibilities
+
+Treat file length as a warning sign, not the architectural reason. A 200-line file can already need decomposition if boundaries are mixed, and a 350-line file can still be fine if it owns one cohesive flow over one model.
+
+Useful split axes:
+
+- API or CLI schema versus domain model
+- domain model versus persistence mapping
+- orchestration versus pure transformation
+- user-facing rendering versus machine-facing serialization
+- settings loading versus runtime consumers
+
+Avoid over-splitting:
+
+- keep small helpers near the module they support when they are not meaningful elsewhere
+- keep a short vertical slice together when the same people change it for the same reasons
+- do not create micro-modules unless they introduce a real ownership or dependency boundary
+
+Avoid fake structure:
+
+- do not default to `utils.py`, `helpers.py`, or `misc.py` as a substitute for naming the real boundary
+- do not split just because functions have different syntax shapes if they still serve one cohesive model
 
 ## Boundary example
 
@@ -89,6 +114,13 @@ __all__ = ["Client", "Result"]
 Use this when the package should promise a narrow import surface.
 
 Do not export internal helpers just because they are convenient today.
+
+When reorganizing modules, check more than imports:
+
+- script entrypoints and `python -m ...` paths
+- config strings or plugin references that name modules directly
+- docs, examples, and generated snippets that show import paths
+- compatibility shims when existing callers still rely on old paths
 
 ## Settings pattern
 

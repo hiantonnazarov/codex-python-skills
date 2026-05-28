@@ -106,6 +106,21 @@ def test_slugify_preserves_ascii_digits_after_dash_bug() -> None:
 
 Name the test so the historical failure is obvious.
 
+When the boundary matters, add the failure shape that users or callers actually see:
+
+- empty or missing input
+- malformed payload or parse failure
+- filesystem or permission error
+- upstream timeout or network failure
+
+Prefer the lowest layer that can prove that contract cleanly.
+
+For filesystem, CLI, and integration-style flows, also ask:
+
+- did the failed run leave partial output behind?
+- is cleanup observable and asserted?
+- if the operation is retried, does it duplicate side effects or recover cleanly?
+
 ## Review prompts for Python tests
 
 Ask these questions while editing or reviewing:

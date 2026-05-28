@@ -8,11 +8,31 @@ Split a Python file when one or more of these are true:
 
 - It is hard to explain the file's purpose in one sentence.
 - It mixes CLI parsing, filesystem or network I/O, formatting, and domain logic.
+- It owns multiple data models, request or response shapes, or persistence records that change independently.
+- One section exists to coordinate work while another section implements the underlying rules.
+- Different sections need different dependencies, mocks, or failure handling.
 - New edits require scrolling through unrelated helpers.
 - The file is approaching 400 lines and still growing.
 - Multiple functions operate on different concepts that could be tested and reused independently.
 
-Do not split mechanically by line count alone. Split around responsibility boundaries.
+Do not split mechanically by line count alone. Treat size as a warning sign only. Split around responsibility, model, and boundary ownership, including when that becomes clear before 400 lines.
+
+Good split axes:
+
+- domain model versus transport schema
+- pure transformations versus side-effecting adapters
+- orchestration versus reusable business rules
+- human-facing formatting versus machine-facing serialization
+
+Do not over-split:
+
+- Keep one cohesive pipeline together when all functions serve the same model and same change reason.
+- Do not create separate files for tiny helpers that are only meaningful inside one module.
+
+Avoid fake modularity:
+
+- Do not move unrelated leftovers into `utils.py`, `helpers.py`, or `misc.py`.
+- Prefer names that describe the owned behavior, contract, or model, for example `slug_rules.py`, `csv_loader.py`, or `response_formatting.py`.
 
 ## Preferred module shape
 
@@ -113,6 +133,12 @@ Rules:
 - Read environment variables once near the boundary.
 - Convert raw strings into typed values immediately.
 - Pass structured settings inward instead of calling `os.environ` everywhere.
+
+Use the same rule for request payloads, CLI args, and file formats:
+
+- normalize once at the edge
+- convert to a typed or clearly-shaped internal object
+- avoid repeated `dict.get(...)` parsing deep inside business logic
 
 ## Error handling pattern
 
